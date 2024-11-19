@@ -33,7 +33,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>IBM_18Nov2024_D7_LINQ_ADO.LINQStandardOperators</StartupObject>
+    <StartupObject>IBM_18Nov2024_D7_LINQ_ADO.ADONETEg</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ADONETEg.cs" />
     <Compile Include="LINQIntro.cs" />
     <Compile Include="LINQStandardOperators.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

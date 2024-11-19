@@ -56,9 +56,6 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
 
 
 
-
-
-
         static void Main(string[] args)
         {
             //BasicIntro();
@@ -232,7 +229,7 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
 
         public static void JoinOperator()
         {
-            var expr =
+            var qry =
     customers
     .SelectMany(c => c.Orders)
      .Join(products,
@@ -241,7 +238,7 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
            (o, p) => new { o.Month, o.Shipped, p.IdProduct, p.Price });
 
 
-            foreach (var item in expr)
+            foreach (var item in qry)
             {
                 Console.WriteLine(item);
             }
@@ -258,12 +255,7 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
 
         public static void GroupByOperator()
         {
-
-
             var grpIntro = customers.GroupBy(c => c.Country);
-
-
-
 
             var expr =
    customers
