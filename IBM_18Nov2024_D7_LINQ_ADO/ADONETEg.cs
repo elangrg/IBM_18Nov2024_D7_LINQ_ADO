@@ -206,8 +206,6 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
 
             Console.WriteLine("Call Stored Proc With Param");
 
-
-
             Console.Write("Enter Product ID:");
 
              _cmd = new SqlCommand("GetProductNameByID", _cn);
@@ -225,9 +223,6 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
 
                 Console.WriteLine($"Product Name is : {_cmd.Parameters["@prdName"].Value}" );
             }
-         
-
-
 
             Console.WriteLine("Press Any key to continue...");
             Console.ReadKey();
