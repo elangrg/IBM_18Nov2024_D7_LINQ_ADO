@@ -31,3 +31,13 @@ BEGIN
 	SELECT @PrdName=ProductName from Product where ProductID =@PrdId
 END
 GO
+
+
+CREATE PROCEDURE GetAllProducts
+	
+AS
+BEGIN
+	    
+	SELECT * from Product 
+END
+GO

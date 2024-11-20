@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data.SqlClient;
 using System.Data;
+using System.Diagnostics;
 
 namespace IBM_18Nov2024_D7_LINQ_ADO
 {
@@ -69,6 +70,20 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
                 }
 
 
+                if (choice == 5)
+                {
+                    StoredProcEg(_cn);
+
+                }
+
+
+
+                if (choice == 6)
+                {
+                    DatasetCRUDOper(_cn);
+
+                }
+
             }
             while (choice!=0);
 
@@ -76,6 +91,146 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
 
 
 
+        }
+
+        private static void DatasetCRUDOper(SqlConnection _cn)
+        {
+            DataSet _ds = new DataSet();
+
+            SqlDataAdapter _da = new SqlDataAdapter();
+
+            _da.SelectCommand = new SqlCommand("select * from Product", _cn);
+            // Query Data 
+            _da.Fill(_ds);
+
+            foreach (DataRow rw in _ds.Tables[0].Rows)
+            {
+                for (int c = 0; c < _ds.Tables[0].Columns.Count; c++)
+                {
+                    Console.Write($"{rw[c]}|");
+                }
+                Console.WriteLine();
+
+            }
+
+            DataTable _dt = _ds.Tables[0];
+
+            DataRow _r = _dt.NewRow();
+            _r[1] = "Tata Nexus "; _r["Qty"] = 1000;  _r["Rate"] = 10000;
+
+            Console.WriteLine(  _r.RowState);
+
+            _dt.Rows.Add(_r);
+            Console.WriteLine(_r.RowState);
+
+            _r = _dt.Select("productId=2")[0];
+
+            Console.WriteLine(_r.RowState);
+
+
+            _r[1] = "Tata HEXA";
+            Console.WriteLine(_r.RowState);
+
+
+            _r = _dt.Select("productId=5")[0];
+            Console.WriteLine(_r.RowState);
+            _r.Delete();
+            Console.WriteLine(_r.RowState);
+
+
+            // - DataAdaptor Config
+
+            _da.InsertCommand = new SqlCommand("INSERT INTO [Product]  ([ProductName] ,[Qty],[Rate]) VALUES (@prd,@Qty,@rate)", _cn);
+
+            _da.InsertCommand.Parameters.Add("@prd", SqlDbType.VarChar, 50).SourceColumn = "ProductName";
+            _da.InsertCommand.Parameters.Add("@Qty", SqlDbType.Int).SourceColumn = "Qty";
+            _da.InsertCommand.Parameters.Add("@rate", SqlDbType.Money).SourceColumn = "Rate";
+
+
+            _da.UpdateCommand = new SqlCommand("UPDATE [Product]  SET [ProductName] = @prd  ,[Qty] = @Qty,[Rate] = @rate WHERE ProductID = @prdId", _cn);
+
+            _da.UpdateCommand.Parameters.Add("@prd", SqlDbType.VarChar, 50).SourceColumn = "ProductName";
+            _da.UpdateCommand.Parameters.Add("@Qty", SqlDbType.Int).SourceColumn = "Qty";
+            _da.UpdateCommand.Parameters.Add("@rate", SqlDbType.Money).SourceColumn = "Rate";
+            _da.UpdateCommand.Parameters.Add("@prdId", SqlDbType.Int).SourceColumn = "ProductID";
+
+
+            _da.DeleteCommand = new SqlCommand("delete from [Product]  WHERE ProductID = @prdId", _cn);
+            _da.DeleteCommand.Parameters.Add("@prdId", SqlDbType.Int).SourceColumn = "ProductID";
+
+
+            _da.ContinueUpdateOnError = true;
+
+            _da.Update(_dt);
+
+
+            Console.WriteLine("Press Any key to continue...");
+            Console.ReadKey();
+
+        }
+
+        private static void StoredProcEg(SqlConnection _cn)
+        {   Console.Clear();
+            Console.WriteLine("Call GetAllProducts Stored Proc:");
+           
+            SqlCommand _cmd = new SqlCommand("GetAllProducts", _cn);
+            _cmd.CommandType = CommandType.StoredProcedure;
+            _cn.Open();
+            SqlDataReader _drdr = _cmd.ExecuteReader();
+
+            if (_drdr.HasRows)
+            {
+
+                Console.WriteLine("Product ID".PadLeft(10, ' ') + "Product Name".PadRight(30, ' ') + "Quantity".PadLeft(10, ' ') + "Rate".PadLeft(10, ' '));
+                Console.WriteLine("_".PadRight(60, '_'));
+
+
+                while (_drdr.Read())
+                {
+                    Console.WriteLine(
+                        $"{_drdr.GetValue(0).ToString().PadLeft(10, ' ')}{_drdr.GetValue(1).ToString().PadRight(30, ' ')}{_drdr.GetValue(2).ToString().PadLeft(10, ' ')}{_drdr.GetValue(3).ToString().PadLeft(10, ' ')}");
+
+                }
+
+
+                _drdr.Close();
+
+
+
+              
+
+            }
+            _cn.Close();
+             Console.WriteLine("Press Any key to continue... ");
+            Console.ReadKey();
+
+            Console.WriteLine("Call Stored Proc With Param");
+
+
+
+            Console.Write("Enter Product ID:");
+
+             _cmd = new SqlCommand("GetProductNameByID", _cn);
+            _cmd.CommandType = CommandType.StoredProcedure;
+            _cmd.Parameters.Add("@prdId", SqlDbType.Int).Value = Console.ReadLine();
+            _cmd.Parameters.Add("@prdName", SqlDbType.VarChar, 50).Direction= ParameterDirection.Output;
+
+            _cn.Open();
+            _cmd.ExecuteNonQuery();
+              _cn.Close();
+
+
+            if (_cmd.Parameters["@prdName"].Value!=null)
+            {
+
+                Console.WriteLine($"Product Name is : {_cmd.Parameters["@prdName"].Value}" );
+            }
+         
+
+
+
+            Console.WriteLine("Press Any key to continue...");
+            Console.ReadKey();
         }
 
         private static void UpdateProduct(SqlConnection _cn)
