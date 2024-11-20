@@ -15,6 +15,7 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
         {
 
             SqlConnection _cn = new SqlConnection();
+
             //_cn.ConnectionString = "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=IBM08Nov2024Db;Integrated Security=True;"; ;
 
             SqlConnectionStringBuilder _cnb = new SqlConnectionStringBuilder();
@@ -54,6 +55,15 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
 
                 }
 
+                if (choice==3)
+                {
+                    UpdateProduct(_cn);
+
+                }
+
+
+
+
 
             }
             while (choice!=0);
@@ -61,6 +71,47 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
 
 
 
+
+        }
+
+        private static void UpdateProduct(SqlConnection _cn)
+        {
+            string prdid= SeekProductByName(_cn);
+
+            if (prdid=="-1") { return; }
+
+
+            Console.Clear();
+            Console.WriteLine("New Value to Update Product ");
+
+            Console.Write("Enter Product Name:");
+            string _prd = Console.ReadLine();
+
+            
+            Console.Write("Enter Quantity:");
+            string _qty = Console.ReadLine();
+
+            Console.Write("Enter Rate:");
+            string _Rate = Console.ReadLine();
+
+
+            SqlCommand _cmd = new SqlCommand("UPDATE [Product]  SET [ProductName] = @prd  ,[Qty] = @Qty,[Rate] = @rate WHERE ProductID = @prdId", _cn);
+
+            _cmd.Parameters.Add("@prdId", SqlDbType.Int).Value = prdid;
+            _cmd.Parameters.Add("@prd", SqlDbType.VarChar, 50).Value = _prd;
+            _cmd.Parameters.Add("@Qty", SqlDbType.Int).Value = _qty;
+            _cmd.Parameters.Add("@rate", SqlDbType.Money).Value = _Rate;
+            _cn.Open();
+            if (_cmd.ExecuteNonQuery() > 0)
+            {
+                Console.WriteLine("Updated Successfully....");
+            }
+            else
+                Console.WriteLine("OOPS Try Again....");
+            _cn.Close();
+
+            Console.WriteLine("Press Any key to continue...");
+            Console.ReadKey();
 
         }
 
@@ -97,7 +148,9 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
             Console.ReadKey();
         }
 
-        private static void ListProductsUsingConComRdr(SqlConnection _cn)
+       
+
+ private static void ListProductsUsingConComRdr(SqlConnection _cn)
         {
             Console.Clear();
 
@@ -120,17 +173,88 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
                 while (_drdr.Read())
                 {
                     Console.WriteLine(
-                        $"{_drdr.GetValue(0).ToString().PadRight(10, ' ')}{_drdr.GetValue(1).ToString().PadRight(30, ' ')}{_drdr.GetValue(2).ToString().PadRight(10, ' ')}{_drdr.GetValue(3).ToString()}");
+                        $"{_drdr.GetValue(0).ToString().PadRight(10, ' ')}{_drdr.GetValue(1).ToString().PadRight(30, ' ')}{_drdr.GetValue(2).ToString().PadLeft(10, ' ')}{_drdr.GetValue(3).ToString().PadLeft(10,' ')}");
                 }
 
 
                 _drdr.Close();
-                _cn.Close();
+              
 
 
             }
             else
                 Console.WriteLine("No Products to Display...");
+
+            _cn.Close();
+
+            Console.WriteLine("Press Any key to continue...");
+            Console.ReadKey();
+        }
+ private static string SeekProductByName(SqlConnection _cn)
+        {
+            Console.Clear();
+
+            SqlCommand _cmd = new SqlCommand( "select * from Product where productname like @filterCtr",_cn);
+            Console.Write(  "Enter Product Name Containing :");
+            _cmd.Parameters.Add("@filterCtr", SqlDbType.VarChar ,50).Value= "%" +   Console.ReadLine() + "%";
+
+
+            Dictionary<string, string> _PrdIDs= new Dictionary<string, string>();
+            int _SeqID = 1;
+
+
+            _cn.Open();
+            SqlDataReader _drdr = _cmd.ExecuteReader();
+
+            if (_drdr.HasRows)
+            {
+
+                Console.WriteLine("Seq No".PadLeft(10, ' ') + "Product Name".PadRight(30, ' ') + "Quantity".PadLeft(10, ' ') + "Rate".PadLeft(10, ' '));
+                Console.WriteLine("_".PadRight(60, '_'));
+
+
+                while (_drdr.Read())
+                {
+                    _PrdIDs.Add(_SeqID.ToString(), _drdr.GetValue(0).ToString());
+
+                    Console.WriteLine(
+                        $"{_SeqID.ToString().PadLeft(10, ' ')}{_drdr.GetValue(1).ToString().PadRight(30, ' ')}{_drdr.GetValue(2).ToString().PadLeft(10, ' ')}{_drdr.GetValue(3).ToString().PadLeft(10,' ')}");
+                    _SeqID++;
+                }
+
+
+                _drdr.Close();
+              
+
+
+                _cn.Close();
+
+
+
+                if (_PrdIDs.Count>1)
+                {
+                    Console.WriteLine( "Enter Product Seq ID to Update:");
+                   return  _PrdIDs[Console.ReadLine()];
+
+                }
+                else
+                    return _PrdIDs["1"];
+
+
+            }
+            else
+            {
+                 Console.WriteLine($"No Records found for '{_cmd.Parameters[0].Value}'");
+                 Console.WriteLine("Press Any key to continue...");_cn.Close();
+                            Console.ReadKey();
+                return "-1";
+            }
+               
+
+            
+
+
+
 
 
             Console.WriteLine("Press Any key to continue...");
