@@ -62,7 +62,11 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
                 }
 
 
+                if (choice == 4)
+                {
+                    DeleteProduct(_cn);
 
+                }
 
 
             }
@@ -114,6 +118,45 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
             Console.ReadKey();
 
         }
+
+
+        private static void DeleteProduct(SqlConnection _cn)
+        {
+            string prdid = SeekProductByName(_cn);
+
+            if (prdid == "-1") { return; }
+
+
+            
+            Console.WriteLine("Are you sure? Delete (Y/N) :");
+
+           
+            string _rst = Console.ReadLine();
+
+
+          if (_rst.ToUpper() != "Y") { return; }
+
+
+            SqlCommand _cmd = new SqlCommand("delete from  [Product]   WHERE ProductID = @prdId", _cn);
+
+            _cmd.Parameters.Add("@prdId", SqlDbType.Int).Value = prdid;
+         
+            _cn.Open();
+            if (_cmd.ExecuteNonQuery() > 0)
+            {
+                Console.WriteLine("Deleted Successfully....");
+            }
+            else
+                Console.WriteLine("OOPS Try Again....");
+            _cn.Close();
+
+            Console.WriteLine("Press Any key to continue...");
+            Console.ReadKey();
+
+        }
+
+
+
 
         private static void AddNewProduct(SqlConnection _cn)
         {
@@ -233,7 +276,7 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
 
                 if (_PrdIDs.Count>1)
                 {
-                    Console.WriteLine( "Enter Product Seq ID to Update:");
+                    Console.WriteLine( "Enter Product Seq ID to Update/Delete:");
                    return  _PrdIDs[Console.ReadLine()];
 
                 }
@@ -251,14 +294,7 @@ namespace IBM_18Nov2024_D7_LINQ_ADO
             }
                
 
-            
-
-
-
-
-
-            Console.WriteLine("Press Any key to continue...");
-            Console.ReadKey();
+                        
         }
     }
 }
